@@ -1,122 +1,52 @@
-import "./App.css";
-import Todo from "./componenets/Todo";
-import TodoForm from "./componenets/TodoForm";
-import FilterButton from "./componenets/FilterButton";
-import React, { useState, useRef, useEffect, useDebugValue } from "react";
-import { nanoid } from "nanoid";
-
-function usePrevious(value) {
-	const ref = useRef();
-	useEffect(() => {
-		ref.current = value;
-	});
-	return ref.current;
-}
+import Heading from "./components/heading/Heading";
+import TodoInput from "./components/TodoInput/TodoInput";
+import { useState } from "react";
+import TodoList from "./components/TodoList/TodoList";
+import constants from "./constants";
 
 function App(props) {
-	const [tasks, setTasks] = useState(props.tasks);
+	const { tasks: initialTasks } = constants;
 
-	function addTask(name) {
-		// alert(name);
-		const newTask = {
-			id: `todo-${nanoid()}`,
-			name,
-			completed: false,
-		};
-
+	const [tasks, setTasks] = useState(initialTasks);
+	const addTask = (newTask) => {
 		setTasks([...tasks, newTask]);
-	}
-
-	function toggleComplete(taskId) {
-		setTasks(
-			tasks?.map((task) => {
-				if (task.id === taskId) {
-					return {
-						...task,
-						completed: !task.completed,
-					};
-				}
-				return task;
-			})
-		);
-	}
-
-	function editTask(taskId, name) {
-		setTasks(
-			tasks?.map((task) => {
-				if (task.id === taskId) {
-					return {
-						...task,
-						name,
-					};
-				}
-				return task;
-			})
-		);
-	}
-
-	function deleteTask(taskId) {
-		setTasks(tasks.filter((task) => task.id !== taskId));
-	}
-
-	const tasksDesc = tasks.length > 1 ? "tasks" : "task";
-
-	const FILTERS = {
-		All: () => true,
-		Active: (task) => !task.completed,
-		Completed: (task) => task.completed,
 	};
-
-	const FILTER_NAMES = Object.keys(FILTERS);
-	const [filter, setFilter] = useState("All");
-
-	const listHeadingRef = useRef(null);
-	const prevLength = usePrevious(tasks.length);
-
-	useEffect(() => {
-		if (tasks.length - prevLength === -1) {
-			listHeadingRef.current.focus();
-		}
-	}, [tasks.length, prevLength]);
-
 	return (
 		<div className="todoapp stack-large">
-			<h1>TodoMatic</h1>
-			<TodoForm addTask={addTask} />
+			<Heading />
+			<TodoInput addTask={addTask} />
 			<div className="filters btn-group stack-exception">
-				{FILTER_NAMES.map((filterKey) => {
-					return (
-						<FilterButton
-							key={filterKey}
-							text={filterKey}
-							isPressed={filterKey === filter}
-							setPressed={setFilter}
-						/>
-					);
-				})}
+				<button
+					type="button"
+					className="btn toggle-btn"
+					aria-pressed="true"
+				>
+					<span className="visually-hidden">Show </span>
+					<span>all</span>
+					<span className="visually-hidden"> tasks</span>
+				</button>
+				<button
+					type="button"
+					className="btn toggle-btn"
+					aria-pressed="false"
+				>
+					<span className="visually-hidden">Show </span>
+					<span>Active</span>
+					<span className="visually-hidden"> tasks</span>
+				</button>
+				<button
+					type="button"
+					className="btn toggle-btn"
+					aria-pressed="false"
+				>
+					<span className="visually-hidden">Show </span>
+					<span>Completed</span>
+					<span className="visually-hidden"> tasks</span>
+				</button>
 			</div>
-			<h2 id="list-heading" tabIndex="-1" ref={listHeadingRef}>
-				{tasks.length} {tasksDesc} remaining
-			</h2>
-			<ul
-				role="list"
-				className="todo-list stack-large stack-exception"
-				aria-labelledby="list-heading"
-			>
-				{tasks?.filter(FILTERS[filter]).map((task, index) => {
-					return (
-						<Todo
-							key={task.id}
-							{...task}
-							toggleComplete={toggleComplete}
-							editTask={editTask}
-							deleteTask={deleteTask}
-						/>
-					);
-				})}
-			</ul>
+			<h2 id="list-heading">3 tasks remaining</h2>
+			<TodoList tasks={tasks} />
 		</div>
 	);
 }
-
 export default App;
