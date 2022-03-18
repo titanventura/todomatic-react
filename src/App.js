@@ -35,20 +35,36 @@ function App(props) {
 		);
 	};
 
+	const FILTERS = constants.filters;
+	const FILTER_FN_MAP = {
+		[`${constants.ALL}`]: () => true,
+		[`${constants.ACTIVE}`]: (todo) => !todo.isComplete,
+		[`${constants.COMPLETED}`]: (todo) => todo.isComplete,
+	};
+
+	const [currentFilter, setCurrentFilter] = useState(constants.ALL);
+
 	return (
 		<div className="todoapp stack-large">
 			<Heading />
 			<TodoInput addTask={addTask} />
 			<div className="filters btn-group stack-exception">
-			{[1, 2, 3].map((e) => (
-				<Filter key={e} name="sm" isPressed={false} />
-			))}
+				{FILTERS.map((filter) => (
+					<Filter
+						key={filter}
+						name={filter}
+						isPressed={currentFilter === filter}
+						setPressed={(filterName) => {
+							setCurrentFilter(filterName);
+						}}
+					/>
+				))}
 			</div>
 			<h2 id="list-heading" data-testid="reamaining-task-text">
 				{tasks.length} {tasks.length === 1 ? "task" : "tasks"} remaining
 			</h2>
 			<TodoList
-				tasks={tasks}
+				tasks={tasks.filter(FILTER_FN_MAP[currentFilter])}
 				deleteTask={deleteTask}
 				editTask={editTask}
 				toggleComplete={toggleComplete}
